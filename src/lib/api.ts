@@ -7,17 +7,21 @@ export const api = axios.create({
   withCredentials: true,
 });
 
-api.interceptors.request.use((config) => {
-  const token = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("access_token="))
-    ?.split("=")[1];
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const isAuthRequest = 
+      error.config?.url?.includes("/auth/login") ||
+      error.config?.url?.includes("/auth/register");
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    if (error.response?.status === 401 && !isAuthRequest) {
+      document.cookie = "access_token=; path=/; max-age=0";
+      window.location.href = "/login";
+    }
+
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
 api.interceptors.response.use(
   (response) => response,
