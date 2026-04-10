@@ -15,12 +15,10 @@ export function middleware(request: NextRequest) {
     pathname.startsWith(route)
   );
 
-  // token yo'q va protected route — login ga
   if (!token && isAuthRoute) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // token bor va public route — chat ga
   if (token && isPublicRoute) {
     return NextResponse.redirect(new URL("/chat", request.url));
   }
